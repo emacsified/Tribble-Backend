@@ -6,7 +6,6 @@ import { POSTGRES_URI } from "./util/secrets";
 import { validateToken } from "./util/tokens";
 
 // Controllers (route handlers)
-import * as apiController from "./controllers/api";
 import * as tokenController from "./controllers/tokens";
 
 // Create Express server
@@ -35,19 +34,5 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.post("/api/refresh", tokenController.refreshTokens);
-
-/**
- * API examples routes.
- */
-app.get("/api", apiController.getApi);
-app.get("/api/facebook", apiController.getFacebook);
-
-// /**
-//  * OAuth authentication routes. (Sign in)
-//  */
-// app.get("/auth/facebook");
-// app.get("/auth/facebook/callback", (req, res) => {
-//   res.redirect(req.session.returnTo || "/");
-// });
 
 export default app;

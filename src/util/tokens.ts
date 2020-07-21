@@ -2,8 +2,10 @@ import jwt from "jsonwebtoken";
 import { Response, Request, NextFunction } from "express";
 import { SESSION_SECRET } from "./secrets";
 import { RequestToken, RefreshToken } from "../types/tokens";
-
-export const validateToken = (req: Request, res: Response, next: NextFunction) => {
+export interface RequestWithUser extends Request {
+  user: object;
+}
+export const validateToken = (req: RequestWithUser, res: Response, next: NextFunction) => {
   if (!req.cookies.jwt) {
     return res.sendStatus(401);
   }
