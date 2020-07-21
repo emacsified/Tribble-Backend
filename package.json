@@ -46,7 +46,7 @@
     "winston": "^3.2.1"
   },
   "devDependencies": {
-    "@types/async": "^3.0.2",
+    "@types/async": "^3.2.3",
     "@types/bcrypt-nodejs": "^0.0.30",
     "@types/body-parser": "^1.17.1",
     "@types/chai": "^4.2.3",
