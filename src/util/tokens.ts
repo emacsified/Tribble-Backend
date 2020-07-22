@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+import * as jwt from "jsonwebtoken";
 import { Response, Request, NextFunction } from "express";
 import { SESSION_SECRET } from "./secrets";
 import { RequestToken, RefreshToken } from "../types/tokens";
