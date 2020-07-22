@@ -1,7 +1,7 @@
-import * as express from "express";
-import * as compression from "compression"; // compresses requests
+import express from "express";
+import compression from "compression"; // compresses requests
 import * as bodyParser from "body-parser";
-import * as mongoose from "mongoose";
+import mongoose from "mongoose";
 import { MONGODB_URI } from "./util/secrets";
 import { validateToken } from "./util/tokens";
 import logger from "./util/logger";
@@ -14,9 +14,19 @@ app.use(validateToken);
 // Connect to MongoDB
 const dbUrl = MONGODB_URI;
 
-mongoose.connect(dbUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose
+  .connect(dbUrl, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true })
+  .then(() => {
+    console.log("MongoDB Connected");
+  });
 
-mongoose.set("debug", function (coll, method, query, doc, options) {
+mongoose.set("debug", function (
+  coll: string,
+  method: string,
+  query: string,
+  doc: string,
+  options: string
+) {
   const set = {
     coll,
     method,
