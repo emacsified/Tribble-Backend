@@ -8,12 +8,13 @@ import { RefreshToken } from "../types/tokens";
 
 export const refreshTokens = (req: Request, res: Response) => {
   try {
-    const token = verify(req.get("authorization"), SESSION_SECRET) as RefreshToken;
-    if (token.tokenType === "refresh") {
+    const token = verify(req.get("authorization") || "", SESSION_SECRET);
+    const MyToken = token as RefreshToken;
+    if (MyToken.tokenType === "refresh") {
       // this is a refresh token
-      const newToken = createJWT({
-        userId: token.userId,
-        role: token.role,
+      const newToken: string = createJWT({
+        userId: MyToken.userId,
+        role: MyToken.role,
         tokenType: "jwt",
       });
       res.status(200).json({ token: newToken });

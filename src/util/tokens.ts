@@ -3,18 +3,18 @@ import { Response, Request, NextFunction } from "express";
 import { SESSION_SECRET } from "./secrets";
 import { RequestToken, RefreshToken } from "../types/tokens";
 export interface RequestWithUser extends Request {
-  user: object;
+  user?: object;
 }
 export const validateToken = (req: RequestWithUser, res: Response, next: NextFunction) => {
   if (!req.cookies.jwt) {
-    return res.sendStatus(401);
+    res.sendStatus(401);
   }
   try {
     const userToken = jwt.verify(req.cookies.jwt, SESSION_SECRET) as RequestToken;
     req.user = userToken;
     return next();
   } catch (e) {
-    return res.sendStatus(401);
+    res.sendStatus(401);
   }
 };
 

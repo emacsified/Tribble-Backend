@@ -5,11 +5,7 @@ coverage/*
 # data definition files
 **/*.d.ts
 # 3rd party libs
-/src/public/
+src/public/*
 # custom definition files
-/src/types/
+src/types/*
 
-# Sequelize files
-migrations/
-models/
-seeders/
