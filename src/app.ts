@@ -4,7 +4,7 @@ import bodyParser from "body-parser";
 import { Sequelize } from "sequelize";
 import { POSTGRES_URI } from "./util/secrets";
 import { validateToken } from "./util/tokens";
-
+import logger from "./util/logger";
 // Controllers (route handlers)
 import * as tokenController from "./controllers/tokens";
 
@@ -16,7 +16,13 @@ const dbUrl = POSTGRES_URI;
 
 const sequelize = new Sequelize({
   dialect: "postgres",
-  host: dbUrl,
+  database: "loyalty",
+  username: "",
+  password: "",
+  host: "localhost",
+  port: 5432,
+  // host: dbUrl,
+  logging: (msg) => logger.info(msg),
 });
 
 try {

@@ -73,6 +73,7 @@
     "eslint": "^6.4.0",
     "jest": "^24.9.0",
     "nodemon": "^2.0.4",
+    "sequelize-cli": "^6.2.0",
     "shelljs": "^0.8.3",
     "supertest": "^4.0.2",
     "ts-jest": "^24.1.0",
@@ -80,9 +81,9 @@
     "typescript": "^3.6.3"
   },
   "standard-version": {
-      "skip": {
-          "commit": true,
-          "changelog": true
-      }
+    "skip": {
+      "commit": true,
+      "changelog": true
+    }
   }
 }

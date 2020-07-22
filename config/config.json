@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "loyalty",
+    "password": "password",
+    "database": "loyalty-dev",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "loyalty",
+    "password": "password",
+    "database": "database-test",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "loyalty",
+    "password": "password",
+    "database": "database-production",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  }
+}
