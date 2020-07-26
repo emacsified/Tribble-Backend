@@ -1,4 +1,4 @@
-import * as bcrypt from "bcrypt-nodejs";
+import * as bcrypt from "bcrypt";
 import * as crypto from "crypto";
 import * as mongoose from "mongoose";
 
@@ -8,7 +8,6 @@ export type UserDocument = mongoose.Document & {
   passwordResetToken: string;
   passwordResetExpires: Date;
 
-  facebook: string;
   tokens: AuthToken[];
 
   profile: {
@@ -23,10 +22,7 @@ export type UserDocument = mongoose.Document & {
   gravatar: (size: number) => string;
 };
 
-type comparePasswordFunction = (
-  candidatePassword: string,
-  cb: (err: any, isMatch: any) => {}
-) => void;
+type comparePasswordFunction = (candidatePassword: string) => Promise<mongoose.Error | boolean>;
 
 export interface AuthToken {
   accessToken: string;
@@ -40,9 +36,6 @@ const userSchema = new mongoose.Schema(
     passwordResetToken: String,
     passwordResetExpires: Date,
 
-    facebook: String,
-    twitter: String,
-    google: String,
     tokens: Array,
 
     profile: {
@@ -68,7 +61,7 @@ userSchema.pre("save", function save(next) {
     if (err) {
       return next(err);
     }
-    bcrypt.hash(user.password, salt, (err: mongoose.Error, hash) => {
+    bcrypt.hash(user.password, salt, (err: mongoose.Error, hash: string) => {
       if (err) {
         return next(err);
       }
@@ -78,13 +71,12 @@ userSchema.pre("save", function save(next) {
   });
 });
 
-const comparePassword: comparePasswordFunction = function (
-  this: UserDocument,
-  candidatePassword,
-  cb
-) {
-  bcrypt.compare(candidatePassword, this.password, (err: mongoose.Error, isMatch: boolean) => {
-    cb(err, isMatch);
+const comparePassword: comparePasswordFunction = function (this: UserDocument, candidatePassword) {
+  return new Promise((resolve, reject) => {
+    bcrypt.compare(candidatePassword, this.password, (err: mongoose.Error, isMatch: boolean) => {
+      err && reject(err);
+      isMatch && resolve(isMatch);
+    });
   });
 };
 

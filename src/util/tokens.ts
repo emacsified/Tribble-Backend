@@ -5,6 +5,9 @@ import { RequestToken, RefreshToken } from "../types/tokens";
 export interface RequestWithUser extends Request {
   user?: object;
 }
+
+// TODO: Move these to statics on the user model
+
 export const validateToken = (req: RequestWithUser, res: Response, next: NextFunction) => {
   if (!req.cookies.jwt) {
     res.sendStatus(401);
