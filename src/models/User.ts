@@ -1,6 +1,9 @@
 import * as bcrypt from "bcrypt";
 import * as crypto from "crypto";
 import * as mongoose from "mongoose";
+import * as jwt from "jsonwebtoken";
+
+import { SESSION_SECRET } from "../util/secrets";
 
 export type UserDocument = mongoose.Document & {
   email: string;
@@ -19,10 +22,13 @@ export type UserDocument = mongoose.Document & {
   };
 
   comparePassword: comparePasswordFunction;
+  createJWT: createJWTFunction;
+  createRefresh: createJWTFunction;
   gravatar: (size: number) => string;
 };
 
 type comparePasswordFunction = (candidatePassword: string) => Promise<mongoose.Error | boolean>;
+type createJWTFunction = () => string;
 
 export interface AuthToken {
   accessToken: string;
@@ -73,14 +79,41 @@ userSchema.pre("save", function save(next) {
 
 const comparePassword: comparePasswordFunction = function (this: UserDocument, candidatePassword) {
   return new Promise((resolve, reject) => {
-    bcrypt.compare(candidatePassword, this.password, (err: mongoose.Error, isMatch: boolean) => {
-      err && reject(err);
-      isMatch && resolve(isMatch);
-    });
+    bcrypt
+      .compare(candidatePassword, this.password)
+      .then((isMatch: boolean) => {
+        resolve(isMatch);
+      })
+      .catch((e: mongoose.Error) => reject(e));
+  });
+};
+
+const createJWT = function (this: UserDocument) {
+  const ObjectToSign = {
+    id: this._id,
+    email: this.email,
+    type: "jwt",
+  };
+  return jwt.sign(ObjectToSign, SESSION_SECRET, {
+    expiresIn: "1h",
+  });
+};
+
+const createRefresh = function (this: UserDocument) {
+  const ObjectToSign = {
+    id: this._id,
+    email: this.email,
+    type: "refresh",
+  };
+
+  return jwt.sign(ObjectToSign, SESSION_SECRET, {
+    expiresIn: "30d",
   });
 };
 
 userSchema.methods.comparePassword = comparePassword;
+userSchema.methods.createJWT = createJWT;
+userSchema.methods.createRefresh = createRefresh;
 
 /**
  * Helper method for getting user's gravatar.

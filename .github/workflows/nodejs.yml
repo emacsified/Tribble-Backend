@@ -14,11 +14,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-      - name: Setup node 12
+      - name: Github Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup node 14
         uses: actions/setup-node@v1
         with:
           node-version: 14.x
+
+      - name: setup MongoDB
+        uses: supercharge/mongodb-github-action@1.3.0
+        with:
+          mongodb-version: 4.2
+          # mongodb-replica-set:
+
       - run: npm i
       - run: npm run lint --if-present
       - run: npm test
