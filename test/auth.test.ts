@@ -137,4 +137,55 @@ describe("Auth Controller Routes", () => {
       expect(typeof validLogin.body.refresh).toBe("string");
     });
   });
+
+  describe("reset password routes", () => {
+    it("should reject a request with missing params", async () => {
+      const missingEmail = await request(app).post("/resetPassword").send({});
+      expect(missingEmail.status).toBe(400);
+      expect(missingEmail.body.error).toBe("Missing credentials");
+    });
+
+    it("should return 200 when the email does not exist", async () => {
+      const nonexistentEmail = await request(app)
+        .post("/resetPassword")
+        .send({ email: "nonexistent@test.test" });
+      expect(nonexistentEmail.status).toBe(200);
+    });
+
+    it("should set tokens when the user does exist", async () => {
+      const validEmail = await request(app)
+        .post("/resetPassword")
+        .send({ email: "test@test.test" });
+      expect(validEmail.status).toBe(200);
+      User.findOne({ email: "test@test.test" }).then((doc) => {
+        const user = doc as UserDocument;
+        expect(user.passwordResetToken).toBeTruthy();
+        expect(user.passwordResetExpires.getTime()).toBeGreaterThan(Date.now());
+      });
+    });
+    it("should return 200 when a valid token is requested", async () => {
+      const validEmail = await request(app)
+        .post("/resetPassword")
+        .send({ email: "test@test.test" });
+      expect(validEmail.status).toBe(200);
+
+      User.findOne({ email: "test@test.test" }).then(async (doc) => {
+        const user = doc as UserDocument;
+        expect(user.passwordResetToken).toBeTruthy();
+        expect(user.passwordResetExpires.getTime()).toBeGreaterThan(Date.now());
+
+        const validToken = await request(app).get(
+          `/resetPassword/${encodeURI(user.passwordResetToken)}`
+        );
+        expect(validToken.status).toBe(200);
+      });
+    });
+
+    // it("should ", () => {});
+
+    it("should return 404 when an invalid token is requested", async () => {
+      const invalidToken = await request(app).get("/resetPassword/test");
+      expect(invalidToken.status).toBe(404);
+    });
+  });
 });

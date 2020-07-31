@@ -106,7 +106,7 @@ export const resetPassword = async (req: Request, res: Response) => {
 };
 
 export const getResetPassword = (req: Request, res: Response) => {
-  User.findOne({ passwordResetToken: req.params.id })
+  User.findOne({ passwordResetToken: decodeURI(req.params.id) })
     .where("passwordResetExpires")
     .gt(Date.now())
     .exec((user) => {
@@ -117,7 +117,8 @@ export const getResetPassword = (req: Request, res: Response) => {
       }
     })
     .catch((e) => {
-      logger.error(e);
+      logger.info(e);
+      return res.sendStatus(404);
     });
 };
 

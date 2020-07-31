@@ -57,9 +57,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.post("/login", authController.login);
 app.post("/register", authController.register);
-app.post("/resetPassword/:id", authController.postResetPassword);
 app.get("/resetPassword/:id", authController.getResetPassword);
 app.post("/resetPassword", authController.resetPassword);
+app.post("/resetPassword/:id", authController.postResetPassword);
 
 // authenticated routes
 app.use(validateToken);
