@@ -89,7 +89,7 @@ export const resetPassword = async (req: Request, res: Response) => {
     if (user) {
       const randomToken = crypto.randomBytes(16);
       user.passwordResetToken = randomToken.toString();
-      user.passwordResetExpires = new Date(Date.now() + 3600000);
+      user.passwordResetExpires = new Date(Date.now() + 1000 * 60 * 60 * 4);
       user
         .save()
         .then(() => {
@@ -106,21 +106,22 @@ export const resetPassword = async (req: Request, res: Response) => {
 };
 
 export const getResetPassword = (req: Request, res: Response) => {
-  User.findOne({ passwordResetToken: decodeURI(req.params.id) })
-    .where("passwordResetExpires")
-    .gt(Date.now())
-    .exec((err, user) => {
-      if (!user || err) {
-        logger.error(err);
+  User.findOne({
+    passwordResetToken: decodeURI(req.params.id),
+    passwordResetExpires: { $gt: new Date() },
+  })
+    .then((doc) => {
+      const user = doc as UserDocument;
+      if (!user) {
         return res.sendStatus(404);
       } else {
         return res.sendStatus(200);
       }
+    })
+    .catch((e) => {
+      logger.info(e);
+      return res.sendStatus(404);
     });
-  // .catch((e) => {
-  //   logger.info(e);
-  //   return res.sendStatus(404);
-  // });
 };
 
 export const postResetPassword = (req: Request, res: Response) => {
@@ -132,11 +133,13 @@ export const postResetPassword = (req: Request, res: Response) => {
     return res.status(400).json({ error: "Invalid password" });
   }
 
-  User.findOne({ passwordResetToken: req.params.id })
+  User.findOne({ passwordResetToken: decodeURI(req.params.id) })
     .where("passwordResetExpires")
     .gt(Date.now())
-    .exec((user: UserDocument) => {
-      if (!user) {
+    .exec((error, doc) => {
+      const user = doc as UserDocument;
+      if (!user || error) {
+        error && logger.error(error);
         return res.sendStatus(404);
       } else {
         user.password = req.body.password;

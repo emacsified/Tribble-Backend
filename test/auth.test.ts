@@ -6,8 +6,11 @@ import { UserDocument } from "../src/models/User";
 const User = mongo.mongoose.model("User");
 
 describe("Auth Controller Routes", () => {
-  beforeAll(() => {
+  beforeAll((done) => {
     mongo.connect();
+    User.deleteMany({}).then(() => {
+      done();
+    });
   });
   afterAll((done) => {
     mongo.disconnect(done);
@@ -139,20 +142,22 @@ describe("Auth Controller Routes", () => {
   });
 
   describe("reset password routes", () => {
-    it("should reject a request with missing params", async () => {
+    it("should reject a request with missing params", async (done) => {
       const missingEmail = await request(app).post("/resetPassword").send({});
       expect(missingEmail.status).toBe(400);
       expect(missingEmail.body.error).toBe("Missing credentials");
+      done();
     });
 
-    it("should return 200 when the email does not exist", async () => {
+    it("should return 200 when the email does not exist", async (done) => {
       const nonexistentEmail = await request(app)
         .post("/resetPassword")
         .send({ email: "nonexistent@test.test" });
       expect(nonexistentEmail.status).toBe(200);
+      done();
     });
 
-    it("should set tokens when the user does exist", async () => {
+    it("should set tokens when the user does exist", async (done) => {
       const validEmail = await request(app)
         .post("/resetPassword")
         .send({ email: "test@test.test" });
@@ -161,6 +166,7 @@ describe("Auth Controller Routes", () => {
         const user = doc as UserDocument;
         expect(user.passwordResetToken).toBeTruthy();
         expect(user.passwordResetExpires.getTime()).toBeGreaterThan(Date.now());
+        done();
       });
     });
     it("should return 200 when a valid token is requested", async (done) => {
@@ -187,6 +193,60 @@ describe("Auth Controller Routes", () => {
     it("should return 404 when an invalid token is requested", async () => {
       const invalidToken = await request(app).get("/resetPassword/test");
       expect(invalidToken.status).toBe(404);
+    });
+  });
+
+  describe("reset password flow", () => {
+    it("should reject a request with missing params", async (done) => {
+      await request(app).post("/resetPassword").send({ email: "test@test.test" });
+
+      User.findOne({ email: "test@test.test" }).then(async (doc) => {
+        const user = doc as UserDocument;
+
+        const missingPassword = await request(app)
+          .post(`/resetPassword/${encodeURI(user.passwordResetToken)}`)
+          .send({ confirmPassword: "test" });
+        const missingConfirmPassword = await request(app)
+          .post(`/resetPassword/${encodeURI(user.passwordResetToken)}`)
+          .send({ password: "test" });
+        const mismatchPassword = await request(app)
+          .post(`/resetPassword/${encodeURI(user.passwordResetToken)}`)
+          .send({ password: "test", confirmPassword: "notTest" });
+
+        expect(missingPassword.status).toBe(400);
+        expect(missingPassword.body.error).toBe("Invalid password");
+
+        expect(missingConfirmPassword.status).toBe(400);
+        expect(missingConfirmPassword.body.error).toBe("Invalid password");
+
+        expect(mismatchPassword.status).toBe(400);
+        expect(mismatchPassword.body.error).toBe("Invalid password");
+        done();
+      });
+    });
+
+    it("should successfully reset the password", async (done) => {
+      const resetRequest = await request(app)
+        .post("/resetPassword")
+        .send({ email: "test@test.test" });
+      expect(resetRequest.status).toBe(200);
+
+      User.findOne({ email: "test@test.test" }).then(async (doc) => {
+        const preUser = doc as UserDocument;
+        const pathParam = encodeURI(preUser.passwordResetToken);
+        const validReset = await request(app)
+          .post(`/resetPassword/${pathParam}`)
+          .send({ password: "test", confirmPassword: "test" });
+
+        expect(validReset.status).toBe(200);
+
+        User.findOne({ email: "test@test.test" }).then(async (doc) => {
+          const user = doc as UserDocument;
+
+          expect(user.password).not.toBe(preUser.password);
+          done();
+        });
+      });
     });
   });
 });
