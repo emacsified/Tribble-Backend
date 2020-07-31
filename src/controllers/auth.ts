@@ -109,17 +109,18 @@ export const getResetPassword = (req: Request, res: Response) => {
   User.findOne({ passwordResetToken: decodeURI(req.params.id) })
     .where("passwordResetExpires")
     .gt(Date.now())
-    .exec((user) => {
-      if (!user) {
+    .exec((err, user) => {
+      if (!user || err) {
+        logger.error(err);
         return res.sendStatus(404);
       } else {
         return res.sendStatus(200);
       }
-    })
-    .catch((e) => {
-      logger.info(e);
-      return res.sendStatus(404);
     });
+  // .catch((e) => {
+  //   logger.info(e);
+  //   return res.sendStatus(404);
+  // });
 };
 
 export const postResetPassword = (req: Request, res: Response) => {

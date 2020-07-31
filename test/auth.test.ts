@@ -163,21 +163,22 @@ describe("Auth Controller Routes", () => {
         expect(user.passwordResetExpires.getTime()).toBeGreaterThan(Date.now());
       });
     });
-    it("should return 200 when a valid token is requested", async () => {
+    it("should return 200 when a valid token is requested", async (done) => {
       const validEmail = await request(app)
         .post("/resetPassword")
         .send({ email: "test@test.test" });
-      expect(validEmail.status).toBe(200);
 
       User.findOne({ email: "test@test.test" }).then(async (doc) => {
         const user = doc as UserDocument;
-        expect(user.passwordResetToken).toBeTruthy();
-        expect(user.passwordResetExpires.getTime()).toBeGreaterThan(Date.now());
-
         const validToken = await request(app).get(
           `/resetPassword/${encodeURI(user.passwordResetToken)}`
         );
+        expect(user.passwordResetToken).toBeTruthy();
+        expect(user.passwordResetExpires.getTime()).toBeGreaterThan(Date.now());
+        expect(validEmail.status).toBe(200);
+
         expect(validToken.status).toBe(200);
+        done();
       });
     });
 
