@@ -5,16 +5,19 @@ import { RequestToken, RefreshToken } from "../types/tokens";
 export interface RequestWithUser extends Request {
   user?: object;
 }
+
+// TODO: Move these to statics on the user model
+
 export const validateToken = (req: RequestWithUser, res: Response, next: NextFunction) => {
-  if (!req.cookies.jwt) {
-    res.sendStatus(401);
+  if (!req.cookies || !req.cookies.jwt) {
+    return res.sendStatus(401);
   }
   try {
     const userToken = jwt.verify(req.cookies.jwt, SESSION_SECRET) as RequestToken;
     req.user = userToken;
     return next();
   } catch (e) {
-    res.sendStatus(401);
+    return res.sendStatus(401);
   }
 };
 
