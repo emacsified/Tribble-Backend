@@ -87,8 +87,8 @@ export const resetPassword = async (req: Request, res: Response) => {
   User.findOne({ email: body.email }).then((doc) => {
     const user = doc as UserDocument;
     if (user) {
-      const randomToken = crypto.randomBytes(16);
-      user.passwordResetToken = randomToken.toString();
+      const randomToken = crypto.randomBytes(32).toString("hex");
+      user.passwordResetToken = randomToken;
       user.passwordResetExpires = new Date(Date.now() + 1000 * 60 * 60 * 4);
       user
         .save()

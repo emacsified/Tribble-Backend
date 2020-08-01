@@ -5,17 +5,14 @@ export default {
   connect: () => {
     mongoose.connect("mongodb://localhost:27017/test-database-temporary", {
       useNewUrlParser: true,
-      autoReconnect: true,
-      reconnectTries: Number.MAX_VALUE,
-      reconnectInterval: 1000,
+      useUnifiedTopology: true,
+      useCreateIndex: true,
       poolSize: 10,
     });
   },
   disconnect: (done: () => void) => {
     mongoose.disconnect(() => {
-      setTimeout(() => {
-        done();
-      }, 5000);
+      done();
     });
   },
 };
