@@ -1,0 +1,47 @@
+version: 2
+updates:
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: eslint
+    versions:
+    - 7.20.0
+    - 7.21.0
+    - 7.22.0
+    - 7.23.0
+    - 7.24.0
+  - dependency-name: concurrently
+    versions:
+    - 6.0.0
+    - 6.0.1
+  - dependency-name: husky
+    versions:
+    - 5.0.9
+    - 5.1.0
+    - 5.1.1
+    - 5.1.2
+    - 5.1.3
+    - 5.2.0
+  - dependency-name: ts-jest
+    versions:
+    - 26.5.1
+    - 26.5.2
+    - 26.5.3
+    - 26.5.4
+  - dependency-name: typescript
+    versions:
+    - 4.1.3
+    - 4.1.4
+    - 4.1.5
+    - 4.2.2
+    - 4.2.3
+  - dependency-name: "@types/concurrently"
+    versions:
+    - 6.0.0
+  - dependency-name: standard-version
+    versions:
+    - 9.1.0
+    - 9.1.1
