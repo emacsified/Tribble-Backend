@@ -67,7 +67,7 @@
     "@typescript-eslint/eslint-plugin": "^2.3.1",
     "@typescript-eslint/parser": "^2.3.1",
     "chai": "^4.2.0",
-    "concurrently": "^5.0.0",
+    "concurrently": "^6.1.0",
     "eslint": "^6.4.0",
     "gitmoji-changelog": "^2.1.0",
     "husky": "^4.2.5",
